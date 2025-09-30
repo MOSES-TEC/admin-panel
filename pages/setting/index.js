@@ -1,0 +1,20 @@
+import Link from "next/link";
+
+export default function setting() {
+    return <>
+        <div className="setting_page">
+            <div className="existing_model_list">
+                <h2>Settings</h2>
+                <div className="ex_model_list_ul">
+                    <ul>
+                       <li><Link href='/setting/overview'>Overview</Link></li>
+                       <li><Link href='/setting/apitokens'>API Tokens</Link></li>
+                       <li><Link href='/setting/envdata'>Env variables</Link></li>
+                       <li><Link href='/setting/roles'>Roles</Link></li>
+                       <li><Link href='/setting/profile'>Profile</Link></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </>
+}

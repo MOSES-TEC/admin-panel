@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Image Gallery | Dribbble Style</title>
+    <!-- Add Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <style>
+        :root {
+            --pink: #ea4c89;
+            --pink-light: #f8e1e9;
+            --gray-light: #f5f5f7;
+            --gray-medium: #e1e1e1;
+            --gray-dark: #767676;
+            --text: #222;
+            --text-light: #999;
+            --radius: 8px;
+            --shadow: 0 2px 10px rgba(0,0,0,0.08);
+            --shadow-hover: 0 5px 15px rgba(0,0,0,0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            color: var(--text);
+            padding: 2rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .upload-btn {
+            background: var(--pink);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(234, 76, 137, 0.3);
+        }
+
+        .upload-btn:hover {
+            background: #d6427a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(234, 76, 137, 0.3);
+        }
+
+        .upload-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        .upload-area {
+            background: var(--gray-light);
+            border-radius: var(--radius);
+            padding: 3rem 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            border: 2px dashed var(--gray-medium);
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--pink);
+            background: var(--pink-light);
+        }
+
+        .upload-area.active {
+            border-color: var(--pink);
+            background: var(--pink-light);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+        }
+
+        .upload-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: var(--pink);
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.75rem;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-info {
+            padding: 1.25rem;
+        }
+
+        .image-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .image-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .image-card:hover .image-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--pink);
+        }
+
+        .action-btn:hover svg {
+            fill: white;
+        }
+
+        .action-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--text-light);
+            transition: fill 0.2s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Dribbble-like empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-light);
+            border-radius: 50%;
+        }
+
+        .empty-icon svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--text-light);
+        }
+
+        .empty-text {
+            font-size: 1.2rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .empty-subtext {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* New styles for modals and cropping */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .close-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-light);
+        }
+
+        .crop-container {
+            width: 100%;
+            height: 400px;
+            background: #f5f5f5;
+            margin-bottom: 1rem;
+        }
+
+        .modal-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .folder-select {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border: 1px solid var(--gray-medium);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+        }
+
+        .folder-create-btn {
+            background: white;
+            color: var(--pink);
+            border: 1px solid var(--pink);
+            margin-right: 1rem;
+        }
+
+        .folder-create-btn:hover {
+            background: var(--pink-light);
+        }
+
+        #folder-name {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border: 1px solid var(--gray-medium);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Media Library</h1>
+            <div>
+                <button class="upload-btn folder-create-btn" id="create-folder-btn">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/>
+                    </svg>
+                    Create Folder
+                </button>
+                <button class="upload-btn" id="trigger-upload">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    </svg>
+                    Upload
+                </button>
+                <input type="file" id="file-input" accept="image/*" multiple>
+            </div>
+        </header>
+
+        <div class="upload-area" id="upload-area">
+            <div class="upload-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </div>
+            <h3 class="upload-text">Drag & drop your images here</h3>
+            <p class="upload-subtext">or click to browse files</p>
+            <button class="upload-btn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                Select files
+            </button>
+        </div>
+
+        <!-- Empty state (would be hidden when images exist) -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
+            </div>
+            <h3 class="empty-text">No shots yet</h3>
+            <p class="empty-subtext">Upload your first image to get started. Showcase your work in this beautiful gallery.</p>
+        </div>
+
+        <!-- Gallery (initially hidden, would show when images exist) -->
+        <div class="gallery" id="image-gallery" style="display: none;">
+            <!-- Sample images - in a real app these would be dynamically generated -->
+            <div class="image-card">
+                <img src="https://source.unsplash.com/random/600x400/?design" alt="Design work" class="image-preview">
+                <div class="image-info">
+                    <div class="image-name">ui-design-concept.jpg</div>
+                    <div class="image-meta">
+                        <span>1.8 MB</span>
+                        <span>2400×1600</span>
+                    </div>
+                </div>
+                <div class="image-actions">
+                    <button class="action-btn" title="Download">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn" title="Delete">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <img src="https://source.unsplash.com/random/600x400/?illustration" alt="Illustration" class="image-preview">
+                <div class="image-info">
+                    <div class="image-name">character-illustration.png</div>
+                    <div class="image-meta">
+                        <span>3.2 MB</span>
+                        <span>3000×2000</span>
+                    </div>
+                </div>
+                <div class="image-actions">
+                    <button class="action-btn" title="Download">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn" title="Delete">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="image-card">
+                <img src="https://source.unsplash.com/random/600x400/?branding" alt="Brand design" class="image-preview">
+                <div class="image-info">
+                    <div class="image-name">brand-guidelines.pdf</div>
+                    <div class="image-meta">
+                        <span>4.5 MB</span>
+                        <span>Document</span>
+                    </div>
+                </div>
+                <div class="image-actions">
+                    <button class="action-btn" title="Download">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn" title="Delete">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add modals -->
+    <div class="modal" id="crop-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Crop Image</h3>
+                <button class="close-btn" id="close-crop">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="crop-container">
+                <img id="crop-image" src="">
+            </div>
+            <select class="folder-select" id="folder-select">
+                <option value="default">Default Folder</option>
+            </select>
+            <div class="modal-actions">
+                <button class="upload-btn" id="cancel-crop">Cancel</button>
+                <button class="upload-btn" id="save-crop">Save Image</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="folder-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Folder</h3>
+                <button class="close-btn" id="close-folder">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="text" id="folder-name" placeholder="Enter folder name">
+            <div class="modal-actions">
+                <button class="upload-btn" id="cancel-folder">Cancel</button>
+                <button class="upload-btn" id="create-folder">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+        // Basic interactivity
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const triggerUpload = document.getElementById('trigger-upload');
+        const imageGallery = document.getElementById('image-gallery');
+        const emptyState = document.querySelector('.empty-state');
+        
+        // New variables for cropping and folders
+        let cropper;
+        let currentFile;
+        const folders = new Set(['default']);
+        
+        // Folder management
+        function updateFolderSelect() {
+            const select = document.getElementById('folder-select');
+            select.innerHTML = '';
+            folders.forEach(folder => {
+                const option = document.createElement('option');
+                option.value = folder;
+                option.textContent = folder;
+                select.appendChild(option);
+            });
+        }
+
+        // Highlight drop area when dragging files over
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('active');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('active');
+            });
+        });
+
+        // Handle file drop
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        // Trigger file input when buttons are clicked
+        uploadArea.addEventListener('click', () => fileInput.click());
+        triggerUpload.addEventListener('click', () => fileInput.click());
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            if (fileInput.files.length) {
+                handleFiles(fileInput.files);
+            }
+        });
+
+        // Handle files - now with cropping
+        function handleFiles(files) {
+            currentFile = files[0];
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                document.getElementById('crop-image').src = e.target.result;
+                document.getElementById('crop-modal').style.display = 'flex';
+                
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(document.getElementById('crop-image'), {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 0.8,
+                    responsive: true,
+                    guides: false
+                });
+            }
+            
+            reader.readAsDataURL(currentFile);
+        }
+
+        // Save cropped image
+        document.getElementById('save-crop').addEventListener('click', () => {
+            const canvas = cropper.getCroppedCanvas();
+            const selectedFolder = document.getElementById('folder-select').value;
+            
+            canvas.toBlob((blob) => {
+                // Here you would typically send the blob to your server
+                // along with the selected folder information
+                console.log('Saving to folder:', selectedFolder);
+                console.log('Processed image:', blob);
+                
+                // For demo purposes, just show the gallery
+                imageGallery.style.display = 'grid';
+                emptyState.style.display = 'none';
+                
+                // Reset file input
+                fileInput.value = '';
+            });
+
+            cropper.destroy();
+            document.getElementById('crop-modal').style.display = 'none';
+        });
+
+        // Folder creation
+        document.getElementById('create-folder-btn').addEventListener('click', () => {
+            document.getElementById('folder-name').value = '';
+            document.getElementById('folder-modal').style.display = 'flex';
+        });
+
+        document.getElementById('create-folder').addEventListener('click', () => {
+            const folderName = document.getElementById('folder-name').value.trim();
+            if (folderName && !folders.has(folderName)) {
+                folders.add(folderName);
+                updateFolderSelect();
+                document.getElementById('folder-modal').style.display = 'none';
+            } else if (folders.has(folderName)) {
+                alert('Folder already exists!');
+            }
+        });
+
+        // Modal close handlers
+        ['#close-crop', '#cancel-crop'].forEach(id => {
+            document.querySelector(id).addEventListener('click', () => {
+                document.getElementById('crop-modal').style.display = 'none';
+                if (cropper) cropper.destroy();
+                fileInput.value = '';
+            });
+        });
+
+        ['#close-folder', '#cancel-folder'].forEach(id => {
+            document.querySelector(id).addEventListener('click', () => {
+                document.getElementById('folder-modal').style.display = 'none';
+            });
+        });
+
+        // Initialize folder select
+        updateFolderSelect();
+    </script>
+</body>
+</html>

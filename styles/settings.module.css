@@ -1,0 +1,90 @@
+.settingsContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.settingsSidebar {
+    width: 250px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-right: 2rem;
+}
+
+.settingsSidebar h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.settingsNavList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.settingsNavItem {
+    margin-bottom: 0.75rem;
+}
+
+.settingsNavLink {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #4a5568;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.settingsNavLink:hover {
+    background: #edf2f7;
+    color: #2d3748;
+}
+
+.settingsNavLinkActive {
+    background: #e2e8f0;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.settingsContent {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.settingsPageTitle {
+    font-size: 1.75rem;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.settingsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.settingsCard {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.settingsCardTitle {
+    font-size: 1.25rem;
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.settingsCardContent {
+    color: #4a5568;
+    line-height: 1.6;
+} 

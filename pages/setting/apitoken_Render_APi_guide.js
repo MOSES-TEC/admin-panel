@@ -1,4 +1,4 @@
-    const renderApiGuide = () => {
+export const renderApiGuide = () => {
         return (
             <div className="api_guide_section">
                 <h2>API Documentation</h2>
@@ -241,3 +241,5 @@ Content-Type: application/json
             </div>
         );
     };
+
+    export default renderApiGuide;
